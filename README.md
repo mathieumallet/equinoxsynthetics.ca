@@ -1,1 +1,1 @@
-This is the backing repo for the website at http://www.equinoxsynthetics.ca
+This is the backing repo for the website at https://www.equinoxsynthetics.ca
