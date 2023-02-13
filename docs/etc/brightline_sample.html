@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Basic BrightLine Integration</title>
+    <script src="//cdn-media.brightline.tv/sdk/gen2/webkit/media/js/brightline.webkit.sdk.2.1.3.js"></script>
+</head>
+
+<body>
+
+    <video id="player" controls autoplay style="width:1280px; height:720px">
+        <source src="//cdn-media.brightline.tv/videos/ads/2015-q4-bmw-7-series-229018/bmw_demo_broadcity_bl720.mp4" type="video/mp4">
+    </video>
+
+    <script type="text/javascript">
+        var v = document.getElementById('player');
+        var BL_sample_ad = '//cdn-media.brightline.tv/products/demos/bmw_engageable_overlay.html';
+        v.addEventListener('playing', function() {setInterval(catchTheFrame,1000);}, false);
+
+        BL.on_deviceInfo = function(){
+            var deviceInfo = {
+                "configId":"1018",
+                "os":window.navigator.platform,
+                "osVersion":window.navigator.appVersion,
+                "appSessionID":"YOU-GENERATE-THIS-GUID",
+                "adSessionID":"YOU-GENERATE-THIS-ID-GUID",
+                "applicationName":"THIS IS YOUR APP NAME",
+                "deviceUUID":null,
+                "platformName":window.navigator.appCodeName+', '+window.navigator.appName,
+                "mobileCarrier":"NA",
+                "manufacturer":window.navigator.vendor,
+                "advertisingIdentifier":null,
+                "applicationIdentifier": window.document.location.hostname,
+                "applicationVersion":"YOU-POPULATE-THIS",
+                "sdkVersion":"2.1.3",
+                "deviceModel":window.navigator.appVersion,
+                "deviceName":"desktop",
+                "screenResolution":screen.width+','+screen.height,
+                "deviceConnectionType":window.navigator.connection,
+                "trackFlag":window.navigator.doNotTrack
+            };
+            return deviceInfo;
+        }
+
+        /* START callbacks */
+
+        /**
+        * Callback for when the BrightLine ad is opened. Called from adState() method
+        * @method on_BL_opened
+        */
+        BL.on_BL_opened = function(){
+            // pub does something here
+            console.log('BRIGHTLINE SDK: BL.openAd() was called');
+        },
+
+        /**
+        * Callback for when the BrightLine ad has rendered. Called from BL_adState() method
+        * @method on_BL_rendered
+        */
+        BL.on_BL_rendered = function(){
+            // pub does something here
+            console.log('BRIGHTLINE SDK: creative has rendered');
+        },
+
+        /**
+        * Callback for when the BrightLine overlay is expanded. Called from BL_adState() method
+        * This is only used when an overlay is expanded to a full screen experience and the commercial spot must be paused
+        * @method on_BL_expanded
+        */
+        BL.on_BL_expanded = function(){
+            // pub does something here
+            v.pause();
+            console.log('BRIGHTLINE SDK: overlay has expanded, pause the stream');
+        },
+
+        /**
+        * Callback for when the BrightLine overlay is collapsed. Called from BL_adState() method
+        * This is only used when an overlay is closed from a full screen experience and the commercial spot must be resumed
+        * @method on_BL_collapsed
+        */
+        BL.on_BL_collapsed = function(){
+            // pub does something here
+            v.play();
+            console.log('BRIGHTLINE SDK: overlay has collapsed, resume the stream');
+        },
+
+        /**
+        * Callback for when the BrightLine overlay is collapsed. Called from BL_adState() method
+        * The clean up is automatic, but this can be used to give more understanding of the ad life cycle
+        * @method on_BL_closed
+        */
+        BL.on_BL_closed = function(){
+            // pub does something here
+            console.log('BRIGHTLINE SDK: BL.closeAd() was called');
+        },
+        /* END callbacks */
+
+        /* initialize BL after deviceInfo is populated and all call backs are set: */
+
+        BL.init();
+
+    function catchTheFrame() {
+        var t;
+        t = Math.round(v.currentTime);
+
+        if ( t == 10 || t == 52 ) {
+            /* BL.openAd('eo.html?sid=34DHF849-G25I-4MR8-D7U3-75E583594B3W', 'player'); */
+            BL.openAd(BL_sample_ad+'?session_id='+guid(), 'player');
+        }else if( t == 40 || t == 81 ){
+            BL.closeAd();
+        }
+    }
+
+        function guid(){
+            function s4(){
+                return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        }
+    </script>
+</body>
+</html>
