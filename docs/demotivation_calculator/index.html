@@ -1,0 +1,153 @@
+<html>
+<head>
+    <title>Demotivation Calculator</title>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+</head>
+<body>
+
+<h1>The Demotivation Calculator</h1>
+
+<p><i>&ldquo;Do you need more salt in your diet?&rdquo;</i></p>
+
+<p>This page can be used to calculate some fun data about the raise you got (or didn't get) this year.</p>
+
+<p class="notice">The data entered on this page is not saved in any way, shape or form. All calculations are made in your browser.</p>
+
+<h3>Setup</h3>
+
+<p>Previous annual salary: <input id="salary" size=10 onkeyup="update();">
+<br><span style="font-size:70%">This is your pre-tax salary from last year, excluding things like bonuses and stock grants.</span>
+</p>
+
+<p>Non-proportional benefits: <input id="benefits" size=10 onkeyup="update();" value="0">
+<br><span style="font-size:70%">This is non-proportional benefits such as bonuses and stock grants. This field is specifically for benefits that are <i>not</i> offered as a percentage of your base salary (because benefits that are a percentage of your base salary would go up proportionally with your raise).</span>
+</p>
+
+<p>Raise amount: <input id="raise" size=10 onkeyup="update();">
+<br><span style="font-size:70%">This is the amount that you got on your raise this year, in dollars. Can be negative, but hopefully isn't.</span>
+</p>
+
+<!-- The inflation rate is the average inflation rate from Dec 2022 to Nov 2023 -->
+<p>Inflation rate: <input id="inflation" size=5 onkeyup="update();" value="4.14">
+<br><span style="font-size:70%">This is the inflation rate for the previous year. The prepopulated value is the average of the Canadian CPI from December 2022 to November 2023.</span>
+</p>
+
+<p>Work hours per week: <input id="hoursPerWeek" size=5 onkeyup="update();" value="37.5">
+<br><span style="font-size:70%">Enter the number of hours you <i>actually</i> work in a week. Zoning out at your desk does count.</span>
+</p>
+
+<h3>Results</h3>
+
+<div id="results">
+    <p>Enter values in all fields to continue.</p>
+</div>
+
+<script>
+function update()
+{
+    clear();
+
+    var salary = document.getElementById("salary").value;
+    var benefits = document.getElementById("benefits").value;
+    var raise = document.getElementById("raise").value;
+    var inflation = document.getElementById("inflation").value;
+    var hoursPerWeek = document.getElementById("hoursPerWeek").value;
+
+    if (salary === "" || benefits === "" || raise === "" || inflation === "" || hours === "")
+    {
+        error("All fields must be populated to continue.");
+        return;
+    }
+
+    if (!isNumber(salary) || !isNumber(benefits) || !isNumber(raise) || !isNumber(inflation) || !isNumber(hoursPerWeek))
+    {
+        error("All fields must be numbers.");
+        return;
+    }
+
+    salary = Number(salary);
+    benefits = Number(benefits);
+    raise = Number(raise);
+    inflation = Number(inflation);
+    hoursPerWeek = Number(hoursPerWeek);
+
+    salary = salary + benefits;
+
+    var newSalary = salary + raise;
+    var raisePercent = newSalary / salary - 1.0;
+
+    // The following is what the old salary would have been today if it went up along with inflation.
+    var adjustedOldSalary = salary * (1 + inflation / 100.0);
+    var effectiveRaise = newSalary - adjustedOldSalary;
+    var effectiveRaisePercent = newSalary / adjustedOldSalary - 1.0;
+
+    var adjustedHours = hoursPerWeek * (1.0 + effectiveRaisePercent);
+    var hoursChange = adjustedHours - hoursPerWeek;
+
+    appendP("According to the values you entered, your new annual salary (including benefits) is " + dollars(newSalary) + ", which is a raise of " + percent(raisePercent) + ".");
+    appendP("However considering the inflation, your previous annual salary (including benefits) would be " + dollars(adjustedOldSalary) + " today.");
+    appendP("So, effectively when taking inflation into account your raise is " + dollars(effectiveRaise) + ", which is a raise of " + percent(effectiveRaisePercent) + ".");
+
+    if (hoursChange > 0.0)
+    {
+        appendP("Since you're being paid more now, you should be working " + hours(hoursChange) + " hours more per week. Otherwise you're really stealing from the company, you ingrate.");
+    }
+    else
+    {
+        appendP("Since you're effectively being paid less now, you should be slacking off for " + hours(-hoursChange)  + " hours per week.");
+    }
+    appendP("This corresponds to " + hours(adjustedHours) + " hours per week.");
+}
+
+function isNumber(value)
+{
+    return !isNaN(value * 2.0);
+}
+
+function clear()
+{
+    document.getElementById("results").innerHTML = "";
+}
+
+function error(message)
+{
+    document.getElementById("results").innerHTML = message;
+}
+
+function append(message)
+{
+    document.getElementById("results").innerHTML += message;
+}
+
+function appendP(message)
+{
+    append("<p>");
+    append(message);
+    append("</p>");
+}
+
+function dollars(value)
+{
+    var formatter = new Intl.NumberFormat('en-CA', {
+        style: 'currency',
+        currency: 'CAD',
+        maximumFractionDigits: 0
+    });
+    return "<b>" + formatter.format(value) + "</b>";
+}
+
+function percent(value)
+{
+    value = (Math.round(value * 10000) / 100).toFixed(2);
+    return "<b>" + (value) + "%</b>";
+}
+
+function hours(value)
+{
+    return "<b>" + (Math.round(value * 10) / 10).toFixed(2) + "</b>";
+}
+
+</script>
+
+</body>
+</html>
